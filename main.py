@@ -1,37 +1,46 @@
-# Import modules
-import numpy as np
-# Import backend modules
-import pyswarms.backend as P
-from pyswarms.backend.topology import Star
-# Import sphere function as objective function
-from pyswarms.utils.functions.single_obj import sphere as f
+import pyswarms.backend.topology as a
+import pyswarms.utils.functions.single_obj as f
 
-my_topology = Star()  # The Topology Class
-my_options = {'c1': 0.6, 'c2': 0.3, 'w': 0.4}  # arbitrarily set
-my_swarm = P.create_swarm(n_particles=50, dimensions=2, options=my_options)  # The Swarm Class
+from custom_functions import *
+from pso import run_pso
 
-print('The following are the attributes of our swarm: {}'.format(my_swarm.__dict__.keys()))
+# number of dimensions to try
+test_dimensions = [10,
+                   30,
+                   50,
+                   100]
 
-iterations = 100  # Set 100 iterations
-for i in range(iterations):
-    # Part 1: Update personal best
-    my_swarm.current_cost = f(my_swarm.position)  # Compute current cost
-    my_swarm.pbest_cost = f(my_swarm.pbest_pos)  # Compute personal best pos
-    my_swarm.pbest_pos, my_swarm.pbest_cost = P.compute_pbest(my_swarm)  # Update and store
+# test functions to try
+test_functions = [{'Name': 'Ackley', 'Expression': f.ackley},
+                  {'Name': 'Rastrigin', 'Expression': f.rastrigin},
+                  {'Name': 'Rosenbrock', 'Expression': f.rosenbrock},
+                  {'Name': 'Schaffer2', 'Expression': f.schaffer2},
+                  {'Name': 'Sphere', 'Expression': f.sphere},
+                  {'Name': 'Griewank', 'Expression': griewank},
+                  {'Name': 'Zakharov', 'Expression': zakharov},
+                  {'Name': 'Cigar', 'Expression': cigar},
+                  {'Name': 'Schwefel', 'Expression': schwefel},
+                  {'Name': 'Salomon', 'Expression': salomon}]
 
-    # Part 2: Update global best
-    # Note that gbest computation is dependent on your topology
-    if np.min(my_swarm.pbest_cost) < my_swarm.best_cost:
-        my_swarm.best_pos, my_swarm.best_cost = my_topology.compute_gbest(my_swarm)
+# architectures
+test_architectures = [{'Name': 'Star', 'Architecture': a.Star},
+                      {'Name': 'Ring', 'Architecture': a.Ring},
+                      {'Name': 'Pyramid', 'Architecture': a.Pyramid},
+                      {'Name': 'Random', 'Architecture': a.Random},
+                      {'Name': 'VonNeuman', 'Architecture': a.VonNeumann}]
 
-    # Let's print our output
-    if i % 20 == 0:
-        print('Iteration: {} | my_swarm.best_cost: {:.4f}'.format(i + 1, my_swarm.best_cost))
+# population sizes
+test_no_particles = [24,
+                     36,
+                     48,
+                     60]
 
-    # Part 3: Update position and velocity matrices
-    # Note that position and velocity updates are dependent on your topology
-    my_swarm.velocity = my_topology.compute_velocity(my_swarm)
-    my_swarm.position = my_topology.compute_position(my_swarm)
+function = test_functions[0]
+topology = test_architectures[0]
+no_particles = test_no_particles[0]
+dimensions = test_dimensions[0]
+max_no_iterations = 5000
+max_no_times_no_improve = 5000
 
-print('The best cost found by our swarm is: {:.4f}'.format(my_swarm.best_cost))
-print('The best position found by our swarm is: {}'.format(my_swarm.best_pos))
+results = run_pso(function, topology, no_particles, dimensions, max_no_iterations, max_no_times_no_improve)
+print(results)
